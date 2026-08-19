@@ -32,6 +32,7 @@
       lib = forAllSystems (system: import ./lib { inherit (nixpkgs.legacyPackages.${system}) lib; });
 
       nixosModules = {
+        ca = ./modules/ca;
         naru = {
           imports = [
             tincr.nixosModules.tincr
@@ -41,6 +42,7 @@
       };
 
       darwinModules = {
+        ca = ./modules/ca;
         tincr = ./modules/tincr/darwin.nix;
         naru = { pkgs, ... }: {
           imports = [
@@ -116,6 +118,16 @@
               pkgs.runCommand "dure-lint" { } "touch $out"
             else
               throw "dure lint failed:\n${nixpkgs.lib.concatStringsSep "\n" lintErrors}";
+          ca = pkgs.runCommand "dure-ca" { nativeBuildInputs = [ pkgs.openssl ]; } ''
+            openssl verify \
+              -CAfile ${./modules/ca/root-ca.crt} \
+              ${./modules/ca/intermediate-ca.crt}
+            openssl x509 -in ${./modules/ca/intermediate-ca.crt} -noout -text > certificate.txt
+            for suffix in n i x z; do
+              grep -q "DNS:$suffix" certificate.txt
+            done
+            touch $out
+          '';
         }
       );
 

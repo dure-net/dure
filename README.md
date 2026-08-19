@@ -107,6 +107,23 @@ nix run .#remove-host
 
 Static host entries keep `.n` names resolvable while tincd starts or restarts.
 
+## Dure CA
+
+Dure publishes the dure root and name-constrained network intermediate
+certificates through `nixosModules.ca` and `darwinModules.ca`. The intermediate
+is trusted by default and can issue DNS certificates only for `.n`, `.i`, `.x`,
+and `.z`. The unrestricted root is not trusted by default.
+
+```nix
+{
+  imports = [ dure.nixosModules.ca ];
+  dure.ca.trustIntermediate = true;
+}
+```
+
+Private keys remain encrypted in the operator repository. They are not stored
+or deployed by Dure.
+
 ## Outputs
 
 ```console
