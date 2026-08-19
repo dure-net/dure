@@ -13,6 +13,7 @@ let
     elem
     filterAttrs
     hasPrefix
+    hasSuffix
     mapAttrsToList
     optional
     optionals
@@ -136,6 +137,11 @@ let
             ++ checkFmt desc "tinc ed25519 key" ed25519Re (net.tinc.pubkey_ed25519 or null)
             ++ checkFmt desc "wireguard key" wgKeyRe (net.wireguard.pubkey or null)
             ++ concatLists (map (a: checkFmt desc "alias" hostnameRe a) net.aliases)
+            ++ optionals (netname == "naru") (
+              map (alias: "${desc}: alias must end in .n: ${alias}") (
+                lib.filter (alias: !hasSuffix ".n" alias) net.aliases
+              )
+            )
             ++ optional (
               net.via != null && !(h.nets ? ${net.via})
             ) "${desc}: via points to unknown net ${net.via}"
@@ -241,5 +247,27 @@ let
       )
     ) namespaces
   );
+  bootstrapErrors = concatLists (
+    map
+      (
+        name:
+        let
+          host = hosts.${name} or null;
+          net = if host != null then host.nets.naru or null else null;
+        in
+        optional (host == null) "missing bootstrap host ${name}"
+        ++ optional (host != null && net == null) "bootstrap host ${name} has no naru network"
+        ++ optional (net != null && net.ip4 == null) "bootstrap host ${name} has no naru ip4"
+        ++ optional (net != null && net.ip6 == null) "bootstrap host ${name} has no naru ip6"
+        ++ optional (net != null && net.via == null) "bootstrap host ${name} has no public via network"
+        ++ optional (
+          net != null && net.via != null && (host.nets.${net.via}.addrs or [ ]) == [ ]
+        ) "bootstrap host ${name} has no public address"
+      )
+      [
+        "taps"
+        "eta"
+      ]
+  );
 in
-duplicates ++ formats ++ unknownFiles
+duplicates ++ formats ++ unknownFiles ++ bootstrapErrors

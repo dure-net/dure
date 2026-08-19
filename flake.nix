@@ -128,6 +128,19 @@
             done
             touch $out
           '';
+          n-zone =
+            pkgs.runCommand "dure-n-zone"
+              {
+                nativeBuildInputs = [
+                  pkgs.bind
+                  pkgs.knot-dns
+                ];
+              }
+              ''
+                named-checkzone n ${self.packages.${system}.n-zone}
+                kzonecheck -o n ${self.packages.${system}.n-zone}
+                touch $out
+              '';
         }
       );
 

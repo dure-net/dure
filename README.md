@@ -124,12 +124,27 @@ and `.z`. The unrestricted root is not trusted by default.
 Private keys remain encrypted in the operator repository. They are not stored
 or deployed by Dure.
 
+## Authoritative DNS
+
+Dure renders the `n.` zone directly from Naru registry records. `taps.n.`
+and `eta.n.` are authoritative bootstrap nameservers. Host names receive A and
+AAAA records from their Naru addresses; additional `.n` aliases become CNAMEs.
+The SOA serial is derived from zone contents, so identical registry data always
+produces identical output.
+
+```console
+nix build .#n-zone
+named-checkzone n result
+kzonecheck -o n result
+```
+
 ## Outputs
 
 ```console
 nix build .#naru-hosts
 nix build .#etc-hosts
 nix build .#etc-hosts-v6only
+nix build .#n-zone
 ```
 
 Raw records are available as flake outputs `hosts` and `users`.
