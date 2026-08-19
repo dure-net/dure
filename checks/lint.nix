@@ -21,7 +21,6 @@ let
 
   # intentional oddities inherited from stockholm
   isTestHost = hasPrefix "test-"; # test fixtures share one naru address
-  exemptUsers = [ "dure" ]; # the dure user's pubkey has always been "lol"
 
   # [ { key; desc; } ] -> errors for keys used by more than one desc
   dupErrors =
@@ -155,7 +154,7 @@ let
     ++ concatLists (
       mapAttrsToList (
         user: u: checkFmt user "mail address" mailRe u.mail ++ checkLines user "ssh key" sshKeyRe u.pubkey
-      ) (removeAttrs users exemptUsers)
+      ) users
     );
 
   knownHostFiles = [
