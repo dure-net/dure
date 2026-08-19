@@ -75,7 +75,16 @@
         let
           pkgs = nixpkgs.legacyPackages.${system};
         in
-        import ./packages.nix { inherit (pkgs) lib runCommand writeText; }
+        import ./packages.nix {
+          inherit (pkgs)
+            coreutils
+            gnutar
+            gzip
+            lib
+            runCommand
+            writeText
+            ;
+        }
         // {
           # wizards: nix run .#add-host / .#remove-host
           add-host = pkgs.writeShellApplication {
@@ -139,6 +148,19 @@
               ''
                 named-checkzone n ${self.packages.${system}.n-zone}
                 kzonecheck -o n ${self.packages.${system}.n-zone}
+                touch $out
+              '';
+          i-zone =
+            pkgs.runCommand "dure-i-zone"
+              {
+                nativeBuildInputs = [
+                  pkgs.bind
+                  pkgs.knot-dns
+                ];
+              }
+              ''
+                named-checkzone i ${self.packages.${system}.i-zone}
+                kzonecheck -o i ${self.packages.${system}.i-zone}
                 touch $out
               '';
         }

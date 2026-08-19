@@ -56,7 +56,7 @@ let
 
   # withV4 only concerns naru; internet hosts always get A records.
   hostsLines =
-    withV4: netHostsLines "naru" "n" naruHosts withV4 + netHostsLines "internet" "n" internetHosts true;
+    withV4: netHostsLines "naru" "n" naruHosts withV4 + netHostsLines "internet" "i" internetHosts true;
 
   own = lib.mapAttrs (_: h: {
     ip4 = h.nets.naru.ip4.addr or null;

@@ -126,14 +126,14 @@ or deployed by Dure.
 
 ## Authoritative DNS
 
-Dure renders the `n.` zone directly from Naru registry records. `taps.n.`
-and `eta.n.` are authoritative bootstrap nameservers. Host names receive A and
-AAAA records from their Naru addresses; additional `.n` aliases become CNAMEs.
-The SOA serial is derived from zone contents, so identical registry data always
-produces identical output.
+Dure renders `n.` and `i.` zones directly from registry records. `taps` and
+`eta` are authoritative bootstrap nameservers. The `.n` zone contains Naru
+overlay addresses; `.i` contains Internet-reachable endpoints. Additional
+aliases become CNAMEs. SOA serials derive from zone contents, so identical
+registry data always produces identical output.
 
 ```console
-nix build .#n-zone
+nix build .#n-zone .#i-zone
 named-checkzone n result
 kzonecheck -o n result
 ```
@@ -145,6 +145,12 @@ nix build .#naru-hosts
 nix build .#etc-hosts
 nix build .#etc-hosts-v6only
 nix build .#n-zone
+nix build .#i-zone
+nix build .#registry-json
+nix build .#naru-hosts-tarball
+nix build .#release
 ```
 
-Raw records are available as flake outputs `hosts` and `users`.
+The release directory contains portable host files, both zones, registry JSON,
+and `SHA256SUMS`. Raw records remain available as flake outputs `hosts` and
+`users`.

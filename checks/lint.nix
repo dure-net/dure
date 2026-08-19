@@ -137,9 +137,12 @@ let
             ++ checkFmt desc "tinc ed25519 key" ed25519Re (net.tinc.pubkey_ed25519 or null)
             ++ checkFmt desc "wireguard key" wgKeyRe (net.wireguard.pubkey or null)
             ++ concatLists (map (a: checkFmt desc "alias" hostnameRe a) net.aliases)
-            ++ optionals (netname == "naru") (
-              map (alias: "${desc}: alias must end in .n: ${alias}") (
-                lib.filter (alias: !hasSuffix ".n" alias) net.aliases
+            ++ optionals (netname == "naru" || netname == "internet") (
+              let
+                suffix = if netname == "naru" then ".n" else ".i";
+              in
+              map (alias: "${desc}: alias must end in ${suffix}: ${alias}") (
+                lib.filter (alias: !hasSuffix suffix alias) net.aliases
               )
             )
             ++ optional (
@@ -259,6 +262,9 @@ let
         ++ optional (host != null && net == null) "bootstrap host ${name} has no naru network"
         ++ optional (net != null && net.ip4 == null) "bootstrap host ${name} has no naru ip4"
         ++ optional (net != null && net.ip6 == null) "bootstrap host ${name} has no naru ip6"
+        ++ optional (
+          net != null && (net.tinc.pubkey_ed25519 or null) == null
+        ) "bootstrap host ${name} has no Ed25519 public key"
         ++ optional (net != null && net.via == null) "bootstrap host ${name} has no public via network"
         ++ optional (
           net != null && net.via != null && (host.nets.${net.via}.addrs or [ ]) == [ ]
