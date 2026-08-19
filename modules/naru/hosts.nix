@@ -24,7 +24,7 @@ let
       ++ map (a: "Subnet = ${a}") net.addrs
       # bare labels: the DNS stub appends its suffix
       ++ map (a: "Alias = ${a}") (
-        lib.filter (a: a != name) (
+        lib.filter (a: a != name && !lib.hasInfix "." a) (
           map (lib.removeSuffix ".n") (lib.filter (lib.hasSuffix ".n") net.aliases)
         )
       )

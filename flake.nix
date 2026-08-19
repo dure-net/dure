@@ -116,6 +116,10 @@
             root = ./.;
             inherit (data) hosts users;
           };
+          naruHostData = import ./modules/naru/hosts.nix { inherit (nixpkgs) lib; };
+          dottedTincAliases = nixpkgs.lib.filter (line: nixpkgs.lib.match "Alias = .*\\..*" line != null) (
+            nixpkgs.lib.concatMap (nixpkgs.lib.splitString "\n") (nixpkgs.lib.attrValues naruHostData.tincHosts)
+          );
         in
         {
           eval = pkgs.runCommand "dure-eval" { } ''
@@ -127,6 +131,11 @@
               pkgs.runCommand "dure-lint" { } "touch $out"
             else
               throw "dure lint failed:\n${nixpkgs.lib.concatStringsSep "\n" lintErrors}";
+          tinc-hosts =
+            if dottedTincAliases == [ ] then
+              pkgs.runCommand "dure-tinc-hosts" { } "touch $out"
+            else
+              throw "dure tinc host files contain dotted aliases:\n${nixpkgs.lib.concatStringsSep "\n" dottedTincAliases}";
         }
       );
 
