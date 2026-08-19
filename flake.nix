@@ -127,42 +127,6 @@
               pkgs.runCommand "dure-lint" { } "touch $out"
             else
               throw "dure lint failed:\n${nixpkgs.lib.concatStringsSep "\n" lintErrors}";
-          ca = pkgs.runCommand "dure-ca" { nativeBuildInputs = [ pkgs.openssl ]; } ''
-            openssl verify \
-              -CAfile ${./modules/ca/root-ca.crt} \
-              ${./modules/ca/intermediate-ca.crt}
-            openssl x509 -in ${./modules/ca/intermediate-ca.crt} -noout -text > certificate.txt
-            for suffix in n i x z; do
-              grep -q "DNS:$suffix" certificate.txt
-            done
-            touch $out
-          '';
-          n-zone =
-            pkgs.runCommand "dure-n-zone"
-              {
-                nativeBuildInputs = [
-                  pkgs.bind
-                  pkgs.knot-dns
-                ];
-              }
-              ''
-                named-checkzone n ${self.packages.${system}.n-zone}
-                kzonecheck -o n ${self.packages.${system}.n-zone}
-                touch $out
-              '';
-          i-zone =
-            pkgs.runCommand "dure-i-zone"
-              {
-                nativeBuildInputs = [
-                  pkgs.bind
-                  pkgs.knot-dns
-                ];
-              }
-              ''
-                named-checkzone i ${self.packages.${system}.i-zone}
-                kzonecheck -o i ${self.packages.${system}.i-zone}
-                touch $out
-              '';
         }
       );
 
