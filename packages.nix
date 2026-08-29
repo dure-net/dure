@@ -29,7 +29,7 @@ let
       );
       body = lib.concatStringsSep "\n" (
         [
-          "@ IN NS taps.${tld}."
+          "@ IN NS cask.${tld}."
           "@ IN NS eta.${tld}."
         ]
         ++ addressRecords
@@ -39,7 +39,7 @@ let
     ''
       $ORIGIN ${tld}.
       $TTL 300
-      @ IN SOA taps.${tld}. hostmaster.${tld}. (
+      @ IN SOA cask.${tld}. hostmaster.${tld}. (
         ${toString serial} ; serial
         3600 ; refresh
         600 ; retry

@@ -270,7 +270,7 @@ let
         ) "bootstrap host ${name} has no public address"
       )
       [
-        "taps"
+        "cask"
         "eta"
       ]
   );
