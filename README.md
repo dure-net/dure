@@ -126,7 +126,7 @@ or deployed by Dure.
 
 ## Authoritative DNS
 
-Dure renders `n.` and `i.` zones directly from registry records. `taps` and
+Dure renders `n.` and `i.` zones directly from registry records. `cask` and
 `eta` are authoritative bootstrap nameservers. The `.n` zone contains Naru
 overlay addresses; `.i` contains Internet-reachable endpoints. Additional
 aliases become CNAMEs. SOA serials derive from zone contents, so identical
