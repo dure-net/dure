@@ -14,12 +14,12 @@ in
     services.tincr.networks.naru = {
       nodeName = cfg.nodename;
       listenPort = cfg.port;
-      ed25519PrivateKeyFile = cfg.ed25519PrivateKeyFile;
+      inherit (cfg) ed25519PrivateKeyFile;
       hosts = naruHostData.tincHosts;
       # Keep bootstrap topology explicit. Filtering preserves evaluation while
       # registry is empty or one relay is being provisioned.
       connectTo = lib.filter (name: naruHostData.tincHosts ? ${name}) [
-        "taps"
+        "cask"
         "eta"
       ];
       extraConfig = ''
