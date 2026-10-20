@@ -117,6 +117,20 @@
             inherit (data) hosts users;
           };
           naruHostData = import ./modules/naru/hosts.nix { inherit (nixpkgs) lib; };
+          bootstrapPeers =
+            map
+              (
+                module:
+                (import module {
+                  config.networking.naru = { };
+                  inherit (nixpkgs) lib;
+                  inherit naruHostData pkgs;
+                }).config.services.tincr.networks.naru.connectTo
+              )
+              [
+                ./modules/naru/nixos.nix
+                ./modules/naru/darwin.nix
+              ];
           dottedTincAliases = nixpkgs.lib.filter (line: nixpkgs.lib.match "Alias = .*\\..*" line != null) (
             nixpkgs.lib.concatMap (nixpkgs.lib.splitString "\n") (nixpkgs.lib.attrValues naruHostData.tincHosts)
           );
@@ -131,6 +145,19 @@
               pkgs.runCommand "dure-lint" { } "touch $out"
             else
               throw "dure lint failed:\n${nixpkgs.lib.concatStringsSep "\n" lintErrors}";
+          naru-bootstrap =
+            if
+              builtins.all (
+                peers:
+                peers == [
+                  "cask"
+                  "eta"
+                ]
+              ) bootstrapPeers
+            then
+              pkgs.runCommand "dure-naru-bootstrap" { } "touch $out"
+            else
+              throw "dure Naru bootstrap peers must be cask and eta on NixOS and Darwin";
           tinc-hosts =
             if dottedTincAliases == [ ] then
               pkgs.runCommand "dure-tinc-hosts" { } "touch $out"
